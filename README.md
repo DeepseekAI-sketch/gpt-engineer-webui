@@ -32,7 +32,12 @@ A comprehensive web interface for [GPT-Engineer](https://github.com/AntonOsika/g
    git clone https://github.com/DeepseekAI-sketch/gpt-engineer-webui.git
    cd gpt-engineer-webui
 
-
+1.1 Make change in App.py do change OPENAI_API_KEY 'sk-or-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' to your
+```bash
+        'OPENAI_API_BASE': os.getenv('OPENAI_API_BASE', 'https://openrouter.ai/api/v1'),
+        'OPENAI_API_KEY': os.getenv('OPENAI_API_KEY', 'sk-or-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'),
+        'MODEL_NAME': os.getenv('MODEL_NAME', 'google/gemini-2.0-flash-thinking-exp:free')
+        
 1. Run the Application
    ```bash
    python -m venv venv
