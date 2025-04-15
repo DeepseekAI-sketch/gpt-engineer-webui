@@ -151,7 +151,7 @@ gpt-engineer-webui/
 
 ## Usage
 
-1. Access the web interface at `http://localhost:5000`
+1. Access the web interface at `http://localhost:8080`
 2. Register a new account or log in with existing credentials
 3. Create a new project or browse existing ones
 4. Submit prompts and manage generated code
