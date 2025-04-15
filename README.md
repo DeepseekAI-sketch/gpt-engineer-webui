@@ -1,6 +1,6 @@
 # GPT-Engineer Web UI
 
-A comprehensive web interface for [GPT-Engineer](https://github.com/AntonOsika/gpt-engineer), allowing you to create and improve AI-generated coding projects through an intuitive UI.
+A comprehensive web interface for GPT-Engineer, allowing you to create and improve AI-generated coding projects through an intuitive UI.
 
 ![image](https://github.com/user-attachments/assets/dae64fa3-6802-443c-98c9-88c15514f2f3)
 
