@@ -31,3 +31,15 @@ A comprehensive web interface for [GPT-Engineer](https://github.com/AntonOsika/g
    ```bash
    git clone https://github.com/DeepseekAI-sketch/gpt-engineer-webui.git
    cd gpt-engineer-webui
+
+
+1. Run the Application
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate
+   python app.py
+Or
+   ```bash
+   python app.py
+   
+
