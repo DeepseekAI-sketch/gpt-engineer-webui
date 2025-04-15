@@ -2,6 +2,9 @@
 
 A comprehensive web interface for [GPT-Engineer](https://github.com/AntonOsika/gpt-engineer), allowing you to create and improve AI-generated coding projects through an intuitive UI.
 
+![image](https://github.com/user-attachments/assets/dae64fa3-6802-443c-98c9-88c15514f2f3)
+
+
 ## Features
 
 - **User Management**: Authentication, roles, and API keys
@@ -10,6 +13,11 @@ A comprehensive web interface for [GPT-Engineer](https://github.com/AntonOsika/g
 - **Job Processing**: Background execution with status tracking
 - **File Browser**: View and explore generated code
 - **API**: RESTful endpoints for all operations
+
+
+![image](https://github.com/user-attachments/assets/6424a134-557a-4d8e-a350-a52f8b1620de)
+![image](https://github.com/user-attachments/assets/4b01a5f9-cf9d-4335-b652-ad15c242b701)
+![image](https://github.com/user-attachments/assets/a8427be9-a052-4755-ae48-0f2ee4f5bb81)
 
 ## Installation
 
