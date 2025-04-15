@@ -1,4 +1,4 @@
--- SQLite database schema for GPT-Engineer Web UI
+- SQLite database schema for GPT-Engineer Web UI
 -- File: schema.sql
 
 -- Users table
@@ -69,3 +69,41 @@ CREATE INDEX idx_job_history_start_time ON job_history(start_time);
 -- Insert admin user with password 'admin'
 INSERT INTO user (username, email, password_hash, is_admin, api_key, is_active)
 VALUES ('admin', 'admin@example.com', 'pbkdf2:sha256:150000$XXXXXXXX$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', 1, 'sk-adminxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 1);
+-- Start transaction for safety
+BEGIN TRANSACTION;
+
+-- Check if the metadata column exists
+SELECT CASE 
+    WHEN COUNT(*) > 0 THEN 
+        'metadata column exists.' 
+    ELSE 
+        'metadata column does not exist.' 
+END AS message
+FROM pragma_table_info('project') 
+WHERE name = 'metadata';
+
+-- Add the new project_metadata column (if it doesn't already exist)
+-- SQLite has limited ALTER TABLE functionality, so we need to check first
+SELECT CASE 
+    WHEN COUNT(*) = 0 THEN 
+        'Adding project_metadata column to project table.' 
+    ELSE 
+        'project_metadata column already exists.' 
+END AS message
+FROM pragma_table_info('project') 
+WHERE name = 'project_metadata';
+
+ALTER TABLE project ADD COLUMN project_metadata JSON;
+
+-- If the old metadata column exists, copy data to the new column
+UPDATE project 
+SET project_metadata = metadata
+WHERE EXISTS (
+    SELECT 1 FROM pragma_table_info('project') WHERE name = 'metadata'
+) AND metadata IS NOT NULL;
+
+-- Commit changes if everything went well
+COMMIT;
+
+-- Verify the new structure
+PRAGMA table_info(project);
