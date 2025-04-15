@@ -74,7 +74,7 @@ app.config.from_mapping(
     GPT_MODELS=json.loads(os.getenv('GPT_MODELS', '{"gpt-4o": "GPT-4o", "gpt-4-turbo": "GPT-4 Turbo", "gpt-3.5-turbo": "GPT-3.5 Turbo"}')),
     API_CONFIG={
         'OPENAI_API_BASE': os.getenv('OPENAI_API_BASE', 'https://openrouter.ai/api/v1'),
-        'OPENAI_API_KEY': os.getenv('OPENAI_API_KEY', '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'),
+        'OPENAI_API_KEY': os.getenv('OPENAI_API_KEY', 'sk-or-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'),
         'MODEL_NAME': os.getenv('MODEL_NAME', 'google/gemini-2.0-flash-thinking-exp:free')
     },
     PROJECT_TEMPLATES=os.getenv('PROJECT_TEMPLATES', 'templates/project_templates'),
