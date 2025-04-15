@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - GPT-Engineer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">My Profile</h1>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">User Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="display-1 text-primary">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <h4>{{ user.username }}</h4>
+                        <p class="text-muted">{{ user.email }}</p>
+                        {% if user.is_admin %}
+                            <span class="badge bg-danger">Administrator</span>
+                        {% endif %}
+                    </div>
+                    
+                    <dl class="row">
+                        <dt class="col-sm-5">Member Since</dt>
+                        <dd class="col-sm-7">{{ user.created_at.strftime('%Y-%m-%d') }}</dd>
+                        
+                        <dt class="col-sm-5">Last Login</dt>
+                        <dd class="col-sm-7">{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</dd>
+                        
+                        <dt class="col-sm-5">Projects</dt>
+                        <dd class="col-sm-7">{{ projects|length }}</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">API Key</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="apiKey" class="form-label">Your API Key</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="apiKey" value="{{ user.api_key }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="toggleApiKey">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" type="button" id="copyApiKey">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">Use this key to authenticate with the GPT-Engineer API.</div>
+                    </div>
+                    
+                    <form action="{{ url_for('regenerate_api_key') }}" method="post">
+                        <button type="submit" class="btn btn-warning btn-sm">
+                            <i class="bi bi-arrow-repeat"></i> Regenerate API Key
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Projects</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if projects %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Last Modified</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in projects %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="fw-bold text-decoration-none">
+                                                    {{ project.name }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if project.status == 'running' %}
+                                                    <span class="badge bg-info">Running</span>
+                                                {% elif project.status == 'completed' %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% elif project.status == 'failed' %}
+                                                    <span class="badge bg-danger">Failed</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Idle</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ project.created_at.strftime('%Y-%m-%d') }}</td>
+                                            <td>{{ project.last_modified.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('improve_project', project_id=project.id) }}" class="btn btn-sm btn-success">
+                                                        <i class="bi bi-magic"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center p-4">
+                            <p class="mb-3">You haven't created any projects yet.</p>
+                            <a href="{{ url_for('create_project') }}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Create Your First Project
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if job_history %}
+                        <div class="list-group list-group-flush">
+                            {% for job in job_history %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                {% if job.job_type == 'create' %}
+                                                    <i class="bi bi-plus-circle text-success"></i> Created
+                                                {% else %}
+                                                    <i class="bi bi-magic text-primary"></i> Improved
+                                                {% endif %}
+                                                <a href="{{ url_for('project_detail', project_id=job.project_id) }}" class="text-decoration-none">
+                                                    {{ job.project.name }}
+                                                </a>
+                                            </h6>
+                                            <p class="text-muted small mb-0">
+                                                {{ job.start_time.strftime('%Y-%m-%d %H:%M') }}
+                                                {% if job.duration_seconds %}
+                                                    ({{ (job.duration_seconds / 60)|round(1) }} minutes)
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <span class="badge {% if job.status == 'running' %}bg-info{% elif job.status == 'completed' %}bg-success{% elif job.status == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                            {{ job.status|capitalize }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center p-4">
+                            <p>No recent activity</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // Toggle API key visibility
+    document.getElementById('toggleApiKey').addEventListener('click', function() {
+        const apiKeyInput = document.getElementById('apiKey');
+        const icon = this.querySelector('i');
+        
+        if (apiKeyInput.type === 'password') {
+            apiKeyInput.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            apiKeyInput.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    });
+    
+    // Copy API key to clipboard
+    document.getElementById('copyApiKey').addEventListener('click', function() {
+        const apiKeyInput = document.getElementById('apiKey');
+        apiKeyInput.type = 'text';
+        apiKeyInput.select();
+        document.execCommand('copy');
+        apiKeyInput.type = 'password';
+        
+        // Show copied notification
+        const originalHTML = this.innerHTML;
+        this.innerHTML = '<i class="bi bi-check"></i>';
+        setTimeout(() => {
+            this.innerHTML = originalHTML;
+        }, 2000);
+    });
+</script>
+{% endblock %}
+{% endblock %}

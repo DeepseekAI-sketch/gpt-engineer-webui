@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects Tagged with: {{ tag }} - GPT-Engineer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Projects Tagged with: <span class="badge bg-secondary">{{ tag }}</span></h1>
+            
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Tag: {{ tag }}</li>
+                </ol>
+            </nav>
+            
+            {% if projects %}
+                <div class="row">
+                    {% for project in projects %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">{{ project.name }}</h5>
+                                    {% if project.status == 'running' %}
+                                        <span class="badge bg-info">Running</span>
+                                    {% elif project.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif project.status == 'failed' %}
+                                        <span class="badge bg-danger">Failed</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Idle</span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    {% if project.description %}
+                                        <p class="card-text">{{ project.description|truncate(100) }}</p>
+                                    {% else %}
+                                        <p class="card-text text-muted">No description available</p>
+                                    {% endif %}
+                                    
+                                    <p class="card-text small">
+                                        <i class="bi bi-calendar"></i> Created: {{ project.created_at.strftime('%Y-%m-%d') }}
+                                    </p>
+                                    <p class="card-text small">
+                                        <i class="bi bi-clock"></i> Modified: {{ project.last_modified.strftime('%Y-%m-%d') }}
+                                    </p>
+                                    <p class="card-text small">
+                                        <i class="bi bi-cpu"></i> Model: {{ project.model }}
+                                    </p>
+                                    
+                                    {% if project.tags %}
+                                        <div class="mt-2">
+                                            {% for tag_name in project.tags.split(',') %}
+                                                <a href="{{ url_for('projects_by_tag', tag=tag_name) }}" class="badge bg-secondary text-decoration-none me-1">{{ tag_name }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <a href="{{ url_for('improve_project', project_id=project.id) }}" class="btn btn-sm btn-success">
+                                            <i class="bi bi-magic"></i> Improve
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No projects found with tag "<strong>{{ tag }}</strong>".
+                </div>
+                
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="bi bi-house-door"></i> Return to Home
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

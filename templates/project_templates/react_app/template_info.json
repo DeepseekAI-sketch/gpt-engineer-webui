@@ -1,0 +1,53 @@
+{
+  "name": "React Application",
+  "description": "A modern React application template with routing, state management, and API integration. Includes a component structure based on best practices.",
+  "version": "1.0.0",
+  "author": "GPT-Engineer Team",
+  "tags": ["react", "javascript", "frontend", "web", "spa"],
+  "technology_stack": {
+    "framework": "React",
+    "state_management": "Redux Toolkit",
+    "routing": "React Router",
+    "styling": "CSS Modules / Styled Components",
+    "api_client": "Axios",
+    "testing": "Jest & React Testing Library"
+  },
+  "key_features": [
+    "Component-based architecture",
+    "Responsive layouts",
+    "State management setup",
+    "Routing configuration",
+    "API integration patterns",
+    "Form handling examples",
+    "Authentication flow"
+  ],
+  "file_structure": {
+    "src": {
+      "components": "Reusable UI components",
+      "pages": "Route-level components",
+      "services": "API and external service integrations",
+      "store": "Redux store configuration and slices",
+      "hooks": "Custom React hooks",
+      "utils": "Helper functions and utilities",
+      "styles": "Global styles and themes"
+    }
+  },
+  "resources": [
+    {
+      "name": "README.md",
+      "description": "Setup instructions and usage guide"
+    },
+    {
+      "name": "package.json",
+      "description": "Project dependencies and scripts"
+    },
+    {
+      "name": "src/App.js",
+      "description": "Main application component with router setup"
+    },
+    {
+      "name": "src/components/Layout/Layout.js",
+      "description": "Main layout component with navigation"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+/* Custom styles for GPT-Engineer Web UI */
+
+/* Global styling */
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #858796;
+  --success-color: #1cc88a;
+  --info-color: #36b9cc;
+  --warning-color: #f6c23e;
+  --danger-color: #e74a3b;
+  --light-color: #f8f9fc;
+  --dark-color: #5a5c69;
+}
+
+body {
+  background-color: #f8f9fc;
+}
+
+/* Card styling */
+.card {
+  border: none;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
+  box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
+}
+
+/* Terminal styling */
+.terminal {
+  background-color: #212529;
+  color: #f8f9fc;
+  font-family: 'Courier New', monospace;
+  padding: 1rem;
+  border-radius: 0.35rem;
+  height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* Code editor styling */
+.code-editor {
+  border: 1px solid #e3e6f0;
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+.code-editor pre {
+  margin: 0;
+  padding: 1rem;
+  max-height: 500px;
+  overflow: auto;
+}
+
+/* File tree styling */
+.file-tree {
+  border-right: 1px solid #e3e6f0;
+}
+
+.file-tree .list-group-item {
+  border-left: none;
+  border-right: none;
+  padding: 0.5rem 1rem;
+}
+
+.file-tree .list-group-item:first-child {
+  border-top: none;
+}
+
+.file-tree .list-group-item.active {
+  background-color: var(--light-color);
+  color: var(--primary-color);
+  border-color: #e3e6f0;
+  font-weight: bold;
+}
+
+/* Prompt editor */
+.prompt-editor {
+  font-family: 'Courier New', monospace;
+  resize: vertical;
+}
+
+/* Rating stars */
+.rating-container {
+  margin-top: 1rem;
+}
+
+.star-rating {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rating-star {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #e3e6f0;
+}
+
+.rating-star:hover,
+.rating-star.bi-star-fill {
+  color: #f6c23e;
+}
+
+/* Log styling for admin panel */
+.log-container {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.log-entry {
+  margin-bottom: 0.25rem;
+}
+
+.log-timestamp {
+  color: #858796;
+  margin-right: 0.5rem;
+}
+
+.log-level {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}

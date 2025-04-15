@@ -1,0 +1,59 @@
+{
+  "name": "Flask Web Application",
+  "description": "A Flask-based web application template with authentication, database integration, and a responsive UI. Follows best practices for Python web development.",
+  "version": "1.0.0",
+  "author": "GPT-Engineer Team",
+  "tags": ["flask", "python", "backend", "web", "fullstack"],
+  "technology_stack": {
+    "framework": "Flask",
+    "database": "SQLAlchemy",
+    "authentication": "Flask-Login",
+    "forms": "Flask-WTF",
+    "frontend": "Jinja2 templates with Bootstrap",
+    "testing": "Pytest"
+  },
+  "key_features": [
+    "User authentication system",
+    "Database models and migrations",
+    "Blueprint-based structure",
+    "Form validation",
+    "CSRF protection",
+    "Responsive UI templates",
+    "Flash messages",
+    "Error handling"
+  ],
+  "file_structure": {
+    "app": {
+      "models": "Database models",
+      "views": "Route definitions and view logic",
+      "forms": "Form classes",
+      "templates": "Jinja2 templates",
+      "static": "CSS, JavaScript, and assets",
+      "utils": "Helper functions"
+    },
+    "config.py": "Application configurations",
+    "migrations": "Database migrations"
+  },
+  "resources": [
+    {
+      "name": "README.md",
+      "description": "Setup instructions and usage guide"
+    },
+    {
+      "name": "requirements.txt",
+      "description": "Project dependencies"
+    },
+    {
+      "name": "app/__init__.py",
+      "description": "Application factory pattern implementation"
+    },
+    {
+      "name": "app/models/user.py",
+      "description": "User model with authentication methods"
+    },
+    {
+      "name": "app/templates/base.html",
+      "description": "Base template with navigation and layout"
+    }
+  ]
+}

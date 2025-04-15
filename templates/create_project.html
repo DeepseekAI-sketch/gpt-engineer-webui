@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Create New Project - GPT-Engineer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <h1 class="mb-4">Create New Project</h1>
+        
+        <div class="card shadow">
+            <div class="card-body">
+                <form action="{{ url_for('create_project') }}" method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="project_name" class="form-label">Project Name</label>
+                                <input type="text" class="form-control" id="project_name" name="project_name" required>
+                                <div class="form-text">Choose a descriptive name for your project.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description (Optional)</label>
+                                <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                                <div class="form-text">Briefly describe your project's purpose.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Model</label>
+                                <select class="form-select" id="model" name="model">
+                                    {% for model in models %}
+                                        <option value="{{ model.id }}" {% if model.id == 'gpt-4o' %}selected{% endif %}>
+                                            {{ model.name }} - {{ model.description }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Select the AI model to use.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">Tags (Optional)</label>
+                                <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g., web, flask, api">
+                                <div class="form-text">Comma-separated tags for categorization</div>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="is_public" name="is_public">
+                                <label class="form-check-label" for="is_public">Make project public</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="prompt" class="form-label">Prompt</label>
+                        <textarea class="form-control prompt-editor" id="prompt" name="prompt" rows="12" required></textarea>
+                        <div class="form-text">
+                            Describe the application you want to build in detail. Be specific about:
+                            <ul>
+                                <li>Functionality and features</li>
+                                <li>Technology stack (if you have preferences)</li>
+                                <li>Design patterns or architecture considerations</li>
+                                <li>Any specific requirements or constraints</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="template" class="form-label">Project Template (Optional)</label>
+                                <select class="form-select" id="template" name="template">
+                                    {% for template in templates %}
+                                        <option value="{{ template.id }}">
+                                            {{ template.name }} - {{ template.description }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Starting templates with predefined structure and resources.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="files" class="form-label">Additional Files (Optional)</label>
+                                <input class="form-control" type="file" id="files" name="files" multiple>
+                                <div class="form-text">Upload any reference files that might help with generating the code.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <a class="text-decoration-none" data-bs-toggle="collapse" href="#advancedOptions" role="button">
+                                <i class="bi bi-gear"></i> Advanced Options
+                            </a>
+                        </div>
+                        <div class="collapse" id="advancedOptions">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="temperature" class="form-label">Temperature</label>
+                                            <input type="range" class="form-range" id="temperature" name="temperature" min="0" max="1" step="0.1" value="0.7">
+                                            <div class="d-flex justify-content-between">
+                                                <span>Precise (0.0)</span>
+                                                <span id="temperatureValue">0.7</span>
+                                                <span>Creative (1.0)</span>
+                                            </div>
+                                            <div class="form-text">Controls randomness: lower values are more deterministic, higher values more creative.</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="context_window" class="form-label">Context Window</label>
+                                            <select class="form-select" id="context_window" name="context_window">
+                                                <option value="">Default</option>
+                                                <option value="4096">4K tokens</option>
+                                                <option value="8192">8K tokens</option>
+                                                <option value="16384">16K tokens</option>
+                                                <option value="32768">32K tokens</option>
+                                            </select>
+                                            <div class="form-text">Max tokens to consider in context (larger = more memory used).</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="steps" class="form-label">Custom Steps</label>
+                                            <input type="text" class="form-control" id="steps" name="steps" placeholder="e.g., plan,architecture,code">
+                                            <div class="form-text">Customize generation steps sequence (comma-separated).</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-rocket"></i> Create Project
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4 shadow">
+            <div class="card-header">
+                <h5>Prompt Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Effective Prompting</h6>
+                        <ul>
+                            <li><strong>Be specific</strong>: Clearly define what you want to build</li>
+                            <li><strong>Include examples</strong>: Provide examples when possible</li>
+                            <li><strong>Specify technologies</strong>: Mention frameworks and languages you prefer</li>
+                            <li><strong>Describe constraints</strong>: Mention any limitations</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Prompt Template</h6>
+                        <pre class="bg-light p-2 border rounded"><code>I want to build a [type of application] that [main functionality].
+
+Key features:
+- Feature 1
+- Feature 2
+- Feature 3
+
+Technical requirements:
+- Use [language/framework]
+- Include [specific components]
+- Follow [design patterns]</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // Update temperature value display
+    document.getElementById('temperature').addEventListener('input', function() {
+        document.getElementById('temperatureValue').textContent = this.value;
+    });
+    
+    // API Configuration
+    const API_CONFIG = {
+        OPENAI_API_BASE: "https://openrouter.ai/api/v1",
+        OPENAI_API_KEY: "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",
+        MODEL_NAME: "google/gemini-2.0-flash-thinking-exp:free"
+    };
+</script>
+{% endblock %}
+
+{% endblock %}

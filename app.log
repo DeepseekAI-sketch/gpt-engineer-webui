@@ -1,0 +1,12 @@
+2025-04-15 12:44:28,736 - apscheduler.scheduler - DEBUG - Looking for jobs to run
+2025-04-15 12:44:28,736 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2025-04-15 12:45:28.725684+01:00 (in 59.988993 seconds)
+2025-04-15 12:44:28,737 - apscheduler.executors.default - INFO - Running job "check_jobs_timeout (trigger: interval[0:01:00], next run at: 2025-04-15 12:45:28 WAT)" (scheduled at 2025-04-15 12:44:28.725684+01:00)
+2025-04-15 12:44:28,738 - apscheduler.executors.default - INFO - Job "check_jobs_timeout (trigger: interval[0:01:00], next run at: 2025-04-15 12:45:28 WAT)" executed successfully
+2025-04-15 12:46:26,579 - apscheduler.scheduler - DEBUG - Looking for jobs to run
+2025-04-15 12:46:26,579 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2025-04-15 12:47:26.570217+01:00 (in 59.990520 seconds)
+2025-04-15 12:46:26,579 - apscheduler.executors.default - INFO - Running job "check_jobs_timeout (trigger: interval[0:01:00], next run at: 2025-04-15 12:47:26 WAT)" (scheduled at 2025-04-15 12:46:26.570217+01:00)
+2025-04-15 12:46:26,579 - apscheduler.executors.default - INFO - Job "check_jobs_timeout (trigger: interval[0:01:00], next run at: 2025-04-15 12:47:26 WAT)" executed successfully
+2025-04-15 12:46:28,736 - apscheduler.scheduler - DEBUG - Looking for jobs to run
+2025-04-15 12:46:28,736 - apscheduler.scheduler - DEBUG - Next wakeup is due at 2025-04-15 12:47:28.725684+01:00 (in 59.989675 seconds)
+2025-04-15 12:46:28,736 - apscheduler.executors.default - INFO - Running job "check_jobs_timeout (trigger: interval[0:01:00], next run at: 2025-04-15 12:47:28 WAT)" (scheduled at 2025-04-15 12:46:28.725684+01:00)
+2025-04-15 12:46:28,736 - apscheduler.executors.default - INFO - Job "check_jobs_timeout (trigger: interval[0:01:00], next run at: 2025-04-15 12:47:28 WAT)" executed successfully

@@ -1,0 +1,525 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.name }} - GPT-Engineer
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h1>{{ project.name }}</h1>
+            <p class="text-muted">
+                {% if tags %}
+                    {% for tag in tags %}
+                        <a href="{{ url_for('projects_by_tag', tag=tag) }}" class="badge bg-secondary text-decoration-none me-1">{{ tag }}</a>
+                    {% endfor %}
+                {% endif %}
+                {% if project.is_public %}
+                    <span class="badge bg-success">Public</span>
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <div class="btn-group">
+                <a href="{{ url_for('improve_project', project_id=project.id) }}" class="btn btn-success">
+                    <i class="bi bi-magic"></i> Improve
+                </a>
+                <a href="{{ url_for('download_project', project_id=project.id) }}" class="btn btn-primary">
+                    <i class="bi bi-download"></i> Download
+                </a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+                <form method="post" action="{{ url_for('clone_project', project_id=project.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-files"></i> Clone
+                    </button>
+                </form>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Project Information
+                    </h5>
+                    <span class="badge {% if project.status == 'running' %}bg-info{% elif project.status == 'completed' %}bg-success{% elif project.status == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}">
+                        {{ project.status|capitalize }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Created:</strong> {{ project.created_at }}</p>
+                            <p><strong>Last Modified:</strong> {{ project.last_modified }}</p>
+                            <p><strong>Model:</strong> {{ project.model }}</p>
+                            {% if project.iteration_count > 0 %}
+                                <p><strong>Improvement Iterations:</strong> {{ project.iteration_count }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if project.description %}
+                                <p><strong>Description:</strong> {{ project.description }}</p>
+                            {% endif %}
+                            {% if project.rating %}
+                                <p>
+                                    <strong>Rating:</strong>
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= project.rating %}
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        {% else %}
+                                            <i class="bi bi-star text-secondary"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+                            {% if is_owner or is_admin %}
+                                <div class="rating-container">
+                                    <p><strong>Rate this project:</strong></p>
+                                    <div class="star-rating">
+                                        {% for i in range(1, 6) %}
+                                            <i class="bi bi-star rating-star" data-rating="{{ i }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-text"></i> Prompt</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0 bg-light p-3 rounded">{{ project.prompt }}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Job History</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% if job_history %}
+                            {% for job in job_history %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-1">{{ job.job_type|capitalize }}</h6>
+                                        <span class="badge {% if job.status == 'running' %}bg-info{% elif job.status == 'completed' %}bg-success{% elif job.status == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                            {{ job.status|capitalize }}
+                                        </span>
+                                    </div>
+                                    <p class="mb-1 small">
+                                        <strong>Started:</strong> {{ job.start_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    </p>
+                                    {% if job.end_time %}
+                                        <p class="mb-1 small">
+                                            <strong>Completed:</strong> {{ job.end_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                                        </p>
+                                        {% if job.duration_seconds %}
+                                            <p class="mb-1 small">
+                                                <strong>Duration:</strong> {{ (job.duration_seconds / 60)|round(1) }} minutes
+                                            </p>
+                                        {% endif %}
+                                    {% endif %}
+                                    <p class="mb-1 small">
+                                        <strong>Model:</strong> {{ job.model }}
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="list-group-item text-center py-3">
+                                <p class="text-muted mb-0">No job history available</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if resources %}
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-folder2-open"></i> Resources</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for resource in resources %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-file-earmark"></i> {{ resource.name }}</span>
+                                        <small>{{ (resource.size / 1024)|round(1) }} KB</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if dependencies %}
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-box"></i> Dependencies</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for dependency in dependencies %}
+                                <div class="list-group-item">
+                                    <span><i class="bi bi-package"></i> {{ dependency }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs" id="projectTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab" aria-controls="files" aria-selected="true">
+                <i class="bi bi-file-code"></i> Files
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="output-tab" data-bs-toggle="tab" data-bs-target="#output" type="button" role="tab" aria-controls="output" aria-selected="false">
+                <i class="bi bi-terminal"></i> Output
+            </button>
+        </li>
+    </ul>
+    <div class="tab-content" id="projectTabsContent">
+        <div class="tab-pane fade show active" id="files" role="tabpanel" aria-labelledby="files-tab">
+            {% if files %}
+                <div class="row mt-3">
+                    <div class="col-md-3 sidebar file-tree">
+                        <div class="card shadow">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-folder2"></i> Files</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush">
+                                    {% for file in files %}
+                                        <a href="#" class="list-group-item list-group-item-action file-link" data-file-index="{{ loop.index0 }}">
+                                            <i class="bi bi-file-code"></i> {{ file.name }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card shadow">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0" id="current-file-name">{{ files[0].name }}</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary copy-btn" data-clipboard-target="#file-code-block">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="code-editor">
+                                    <pre><code id="file-code-block" class="language-{{ files[0].name.split('.')[-1] }}">{{ files[0].content }}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info mt-3">
+                    No files generated yet. If the project is still running, files will appear once the process completes.
+                </div>
+            {% endif %}
+        </div>
+        <div class="tab-pane fade" id="output" role="tabpanel" aria-labelledby="output-tab">
+            <div class="card shadow mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-terminal"></i> Console Output</h5>
+                </div>
+                <div class="card-body">
+                    <div class="terminal" id="output-terminal">
+                        {% if output %}
+                            {% for line in output %}
+                                {{ line }}
+                            {% endfor %}
+                        {% else %}
+                            No output available.
+                        {% endif %}
+                    </div>
+                    
+                    {% if project.status == 'failed' and error %}
+                        <div class="alert alert-danger mt-3">
+                            <h5>Error:</h5>
+                            <pre>{{ error }}</pre>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Project Modal -->
+<div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProjectModalLabel">Edit Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('edit_project', project_id=project.id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Project Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ project.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ project.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags</label>
+                        <input type="text" class="form-control" id="tags" name="tags" value="{{ project.tags }}">
+                        <div class="form-text">Comma-separated tags for categorization</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_public" name="is_public" {% if project.is_public %}checked{% endif %}>
+                        <label class="form-check-label" for="is_public">Make project public</label>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> Warning: This action cannot be undone!
+                </div>
+                <p>Are you sure you want to delete project "{{ project.name }}"?</p>
+                <p>This will permanently remove all code and history associated with this project.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('delete_project', project_id=project.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Delete Project</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>
+    // Store all file data in JavaScript
+    const files = {{ files|tojson }};
+    
+    // Initialize clipboard.js
+    new ClipboardJS('.copy-btn');
+    
+    // Update file content when clicking on a file in the file tree
+    document.querySelectorAll('.file-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const fileIndex = this.getAttribute('data-file-index');
+            const file = files[fileIndex];
+            
+            // Update the current file name
+            document.getElementById('current-file-name').innerText = file.name;
+            
+            // Update the file content
+            const codeBlock = document.getElementById('file-code-block');
+            
+            if (file.is_binary) {
+                codeBlock.className = '';
+                codeBlock.textContent = 'This is a binary file and cannot be displayed.';
+            } else {
+                // Get the file extension for syntax highlighting
+                const extension = file.name.split('.').pop();
+                codeBlock.className = 'language-' + extension;
+                codeBlock.textContent = file.content;
+                
+                // Reapply syntax highlighting
+                hljs.highlightElement(codeBlock);
+            }
+            
+            // Remove active class from all file links
+            document.querySelectorAll('.file-link').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Add active class to the clicked link
+            this.classList.add('active');
+        });
+    });
+    
+    // Auto-refresh for running jobs
+    {% if project.status == 'running' %}
+        const outputTerminal = document.getElementById('output-terminal');
+        let refreshAttempts = 0;
+        const MAX_REFRESH_ATTEMPTS = 10;
+        
+        // Function to update project status
+        function updateProjectStatus() {
+            fetch('/api/projects/{{ project.id }}/status')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Status update:", data); // For debugging
+                    
+                    // Update terminal output
+                    if (data.output && data.output.length > 0) {
+                        outputTerminal.innerHTML = data.output.join('');
+                        outputTerminal.scrollTop = outputTerminal.scrollHeight;
+                    }
+                    
+                    // Check if the job is still running
+                    if (data.status === 'running') {
+                        // Continue polling
+                        refreshAttempts = 0; // Reset attempts counter on successful response
+                        setTimeout(updateProjectStatus, 2000);
+                    } else {
+                        // Reload the page to show final results
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating project status:', error);
+                    refreshAttempts++;
+                    
+                    if (refreshAttempts < MAX_REFRESH_ATTEMPTS) {
+                        // Retry after a longer delay with exponential backoff
+                        const delay = Math.min(2000 * Math.pow(1.5, refreshAttempts), 10000);
+                        console.log(`Retry ${refreshAttempts} after ${delay}ms`);
+                        setTimeout(updateProjectStatus, delay);
+                    } else {
+                        // Too many failures, show error and offer manual refresh
+                        outputTerminal.innerHTML += "\n\nError updating status. Please refresh the page manually.";
+                        
+                        // Add a refresh button
+                        const refreshButton = document.createElement('button');
+                        refreshButton.className = 'btn btn-warning mt-3';
+                        refreshButton.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Now';
+                        refreshButton.onclick = function() { window.location.reload(); };
+                        
+                        const container = outputTerminal.parentElement;
+                        container.appendChild(refreshButton);
+                    }
+                });
+        }
+        
+        // Start polling for updates
+        setTimeout(updateProjectStatus, 2000);
+    {% endif %}
+    
+    // Project rating
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            document.querySelectorAll('.rating-star').forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('bi-star');
+                    s.classList.add('bi-star-fill');
+                } else {
+                    s.classList.remove('bi-star-fill');
+                    s.classList.add('bi-star');
+                }
+            });
+        });
+        
+        star.addEventListener('mouseout', function() {
+            const currentRating = {{ project.rating|default(0) }};
+            document.querySelectorAll('.rating-star').forEach((s, index) => {
+                if (index < currentRating) {
+                    s.classList.remove('bi-star');
+                    s.classList.add('bi-star-fill');
+                } else {
+                    s.classList.remove('bi-star-fill');
+                    s.classList.add('bi-star');
+                }
+            });
+        });
+        
+
+        // Add this to your project detail page
+document.addEventListener('DOMContentLoaded', function() {
+    const errorDisplay = document.querySelector('.error-display');
+    if (errorDisplay) {
+        // Make error details expandable/collapsible
+        const toggleButton = document.createElement('button');
+        toggleButton.textContent = 'Show Details';
+        toggleButton.className = 'btn btn-sm btn-outline-danger';
+        toggleButton.addEventListener('click', function() {
+            const errorDetails = document.querySelector('.error-details');
+            if (errorDetails.style.display === 'none') {
+                errorDetails.style.display = 'block';
+                this.textContent = 'Hide Details';
+            } else {
+                errorDetails.style.display = 'none';
+                this.textContent = 'Show Details';
+            }
+        });
+        errorDisplay.appendChild(toggleButton);
+    }
+});
+
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            
+            fetch('/project/{{ project.id }}/rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'rating=' + rating
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the UI
+                    document.querySelectorAll('.rating-star').forEach((s, index) => {
+                        if (index < rating) {
+                            s.classList.remove('bi-star');
+                            s.classList.add('bi-star-fill');
+                        } else {
+                            s.classList.remove('bi-star-fill');
+                            s.classList.add('bi-star');
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error rating project:', error);
+            });
+        });
+    });
+</script>
+{% endblock %}

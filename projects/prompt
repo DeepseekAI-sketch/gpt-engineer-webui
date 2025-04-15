@@ -1,0 +1,24 @@
+Create a modern React dashboard application with the following features:
+
+1. User authentication system (login, register, forgot password)
+2. Dashboard with analytics overview displaying:
+   - User statistics
+   - Activity charts
+   - Recent transactions
+   - Performance metrics
+
+3. Navigation sidebar with collapsible menu items
+4. Data tables with sorting, filtering, and pagination
+5. Settings page for user profile management
+6. Dark/light theme toggle
+
+Technical requirements:
+- Use React with functional components and hooks
+- State management with Redux Toolkit
+- Styling with styled-components
+- Chart visualizations with Recharts
+- Form validation with Formik + Yup
+- API integration with Axios
+- Responsive design for mobile, tablet, and desktop
+
+Please include proper error handling, loading states, and follow best practices for React development.

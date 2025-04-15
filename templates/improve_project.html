@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Improve Project: {{ project.name }} - GPT-Engineer{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Improve Project: {{ project.name }}</h1>
+                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Project
+                </a>
+            </div>
+            
+            <div class="alert alert-info">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="bi bi-lightbulb-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h5>Improvement Mode</h5>
+                        <p class="mb-0">
+                            In improvement mode, GPT-Engineer will analyze your existing project files and make modifications based on your instructions.
+                            Be specific about what you want to improve or add to the project.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-magic"></i> Improve Your Project</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('improve_project', project_id=project.id) }}" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="model" class="form-label">Model</label>
+                                <select class="form-select" id="model" name="model">
+                                    {% for model in models %}
+                                        <option value="{{ model.id }}" {% if model.id == project.model %}selected{% endif %}>
+                                            {{ model.name }} - {{ model.description }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Select the AI model to use for improvement.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="prompt" class="form-label">Improvement Prompt</label>
+                            <textarea class="form-control prompt-editor" id="prompt" name="prompt" rows="15" required></textarea>
+                            <div class="form-text">
+                                Describe the improvements you want to make to the project. Be specific about:
+                                <ul>
+                                    <li>What features or components need improvement</li>
+                                    <li>Any bugs that need fixing</li>
+                                    <li>New functionality you want to add</li>
+                                    <li>Changes to existing code or architecture</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <a class="text-decoration-none" data-bs-toggle="collapse" href="#advancedOptions" role="button">
+                                    <i class="bi bi-gear"></i> Advanced Options
+                                </a>
+                            </div>
+                            <div class="collapse" id="advancedOptions">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="temperature" class="form-label">Temperature</label>
+                                                <input type="range" class="form-range" id="temperature" name="temperature" min="0" max="1" step="0.1" value="0.7">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Precise (0.0)</span>
+                                                    <span id="temperatureValue">0.7</span>
+                                                    <span>Creative (1.0)</span>
+                                                </div>
+                                                <div class="form-text">Controls randomness: lower values are more deterministic, higher values more creative.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="context_window" class="form-label">Context Window</label>
+                                                <select class="form-select" id="context_window" name="context_window">
+                                                    <option value="">Default</option>
+                                                    <option value="4096">4K tokens</option>
+                                                    <option value="8192">8K tokens</option>
+                                                    <option value="16384">16K tokens</option>
+                                                    <option value="32768">32K tokens</option>
+                                                </select>
+                                                <div class="form-text">Max tokens to consider in context (larger = more memory used).</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label for="steps" class="form-label">Custom Steps</label>
+                                                <input type="text" class="form-control" id="steps" name="steps" placeholder="e.g., clarify,plan,improve">
+                                                <div class="form-text">Customize improvement steps sequence (comma-separated).</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-magic"></i> Start Improvement
+                            </button>
+                            <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-lightbulb"></i> Improvement Tips</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Effective Improvement Prompts</h5>
+                            <ul>
+                                <li><strong>Be specific</strong> about what you want to improve</li>
+                                <li><strong>Reference existing files</strong> when suggesting changes</li>
+                                <li><strong>Provide examples</strong> of desired behavior when possible</li>
+                                <li><strong>Mention files to keep unchanged</strong> if you want to preserve certain components</li>
+                                <li><strong>Include error messages</strong> if you're trying to fix bugs</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Improvement Prompt Template</h5>
+                            <pre class="bg-light p-3 rounded"><code>I want to improve my [type of application] by:
+
+1. Fixing [specific issue or bug]
+2. Adding [new feature]
+3. Enhancing [existing component]
+
+Please maintain the current [specific elements to preserve]
+and ensure compatibility with [dependencies/environment].
+
+Current error: [error message if applicable]</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // Update temperature value display
+    document.getElementById('temperature').addEventListener('input', function() {
+        document.getElementById('temperatureValue').textContent = this.value;
+    });
+    
+    // Load existing project prompt as a starting point
+    window.addEventListener('DOMContentLoaded', function() {
+        // Set a template for improvement
+        const promptTemplate = `I want to improve this project by adding/fixing/enhancing the following:
+
+1. 
+2. 
+3. 
+
+Please maintain the current architecture and code style while making these improvements.`;
+        
+        document.getElementById('prompt').value = promptTemplate;
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

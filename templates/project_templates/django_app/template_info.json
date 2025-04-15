@@ -1,0 +1,32 @@
+templates/project_templates/django_web_app/
+├── template_info.json
+├── manage.py                   # Django management script
+├── requirements.txt            # Python dependencies
+├── README.md                   # Template documentation
+├── .env.example                # Environment variables example
+├── project_name/               # Main project folder
+│   ├── __init__.py
+│   ├── settings.py             # Project settings
+│   ├── urls.py                 # URL configuration
+│   ├── asgi.py                 # ASGI configuration
+│   └── wsgi.py                 # WSGI configuration
+└── app_name/                   # Example app
+    ├── __init__.py
+    ├── admin.py                # Admin configurations
+    ├── apps.py                 # App configuration
+    ├── models.py               # Data models
+    ├── views.py                # View functions
+    ├── urls.py                 # App URLs
+    ├── tests.py                # Tests
+    ├── forms.py                # Forms
+    ├── migrations/             # Database migrations
+    │   └── __init__.py
+    ├── templates/              # HTML templates
+    │   └── app_name/
+    │       ├── base.html
+    │       └── index.html
+    └── static/                 # Static files
+        └── app_name/
+            ├── css/
+            ├── js/
+            └── images/

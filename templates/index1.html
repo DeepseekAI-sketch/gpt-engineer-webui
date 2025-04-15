@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT Engineer</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header-logo {
+            height: 50px;
+        }
+        .project-card {
+            transition: transform 0.2s ease-in-out;
+            height: 100%;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .code-area {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .sidebar-menu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.25rem;
+        }
+        .sidebar-menu a:hover {
+            background-color: #e2e8f0;
+        }
+        .sidebar-menu a.active {
+            background-color: #4299e1;
+            color: white;
+        }
+        .task-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-idle {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .status-running {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .status-completed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .status-failed {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .file-tree {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+        .file-tree-item {
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-radius: 0.25rem;
+        }
+        .file-tree-item:hover {
+            background-color: #e2e8f0;
+        }
+        .file-tree-item i {
+            margin-right: 0.5rem;
+        }
+        .tab-bar {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            border-bottom: 2px solid #4299e1;
+            color: #2b6cb0;
+            font-weight: 600;
+        }
+        .tab:hover:not(.active) {
+            border-bottom: 2px solid #a0aec0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="content-container flex justify-between items-center py-3 px-6">
+            <div class="flex items-center">
+                <a href="#" class="flex items-center">
+                    <i class="fas fa-robot text-blue-600 text-3xl mr-2"></i>
+                    <h1 class="text-xl font-bold text-gray-800">GPT Engineer</h1>
+                </a>
+            </div>
+            <div class="hidden md:flex space-x-4">
+                <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-100">Dashboard</a>
+                <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-100">Projects</a>
+                <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-100">Templates</a>
+                <a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-100">Settings</a>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    <i class="fas fa-plus mr-1"></i> New Project
+                </button>
+                <div class="relative">
+                    <button class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-800 hover:bg-gray-100">
+                        <img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-system-icons/assets/People/SVG/ic_fluent_person_circle_24_regular.svg" alt="User" class="w-6 h-6 mr-1">
+                        <span>User</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="flex-grow">
+        <div class="content-container py-8 px-6">
+            <!-- Dashboard Stats -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                                <i class="fas fa-project-diagram text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Projects</p>
+                                <h3 class="text-2xl font-bold">12</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                                <i class="fas fa-check-circle text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Completed Jobs</p>
+                                <h3 class="text-2xl font-bold">8</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                                <i class="fas fa-spinner text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Active Jobs</p>
+                                <h3 class="text-2xl font-bold">2</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Projects -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Recent Projects</h2>
+                    <a href="#" class="text-blue-600 hover:text-blue-800">View All</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Project 1 -->
+                    <div class="bg-white rounded-lg shadow-md project-card">
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-gray-800">E-commerce Platform</h3>
+                                <span class="task-status status-completed">Completed</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">An advanced e-commerce platform with product catalog, user authentication, and payment processing.</p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">Node.js</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">React</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">MongoDB</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Last modified: 2 days ago</span>
+                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Project 2 -->
+                    <div class="bg-white rounded-lg shadow-md project-card">
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-gray-800">Weather Dashboard</h3>
+                                <span class="task-status status-running">Running</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Interactive weather dashboard with location-based forecasts, historical data, and visualization tools.</p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">Python</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">Flask</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">D3.js</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Last modified: 5 hours ago</span>
+                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Project 3 -->
+                    <div class="bg-white rounded-lg shadow-md project-card">
+                        <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-gray-800">Task Management</h3>
+                                <span class="task-status status-idle">Idle</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">Collaborative task management application with real-time updates, notifications, and progress tracking.</p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">JavaScript</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">Vue.js</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">Firebase</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">Last modified: 1 week ago</span>
+                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Detail Section -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Project Detail: E-commerce Platform</h2>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <div class="flex items-center mb-2">
+                                <h3 class="text-xl font-bold text-gray-800 mr-3">E-commerce Platform</h3>
+                                <span class="task-status status-completed">Completed</span>
+                            </div>
+                            <p class="text-gray-600 mb-2">An advanced e-commerce platform with product catalog, user authentication, and payment processing.</p>
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">Node.js</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">React</span>
+                                <span class="text-xs bg-gray-200 px-2 py-1 rounded-full">MongoDB</span>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                Created: May 15, 2023 | Last modified: May 17, 2023
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                <i class="fas fa-download mr-1"></i> Download
+                            </button>
+                            <button class="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                <i class="fas fa-sync-alt mr-1"></i> Improve
+                            </button>
+                            <button class="px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+                                <i class="fas fa-copy mr-1"></i> Clone
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tab-bar">
+                        <div class="tab active">Files</div>
+                        <div class="tab">Resources</div>
+                        <div class="tab">Output Log</div>
+                        <div class="tab">Job History</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <!-- File Tree -->
+                        <div class="file-tree bg-gray-100 p-3 rounded-lg">
+                            <div class="text-gray-700 font-medium mb-2">Project Files</div>
+                            <div>
+                                <div class="file-tree-item">
+                                    <i class="fas fa-folder text-yellow-500"></i> src
+                                </div>
+                                <div class="pl-5">
+                                    <div class="file-tree-item">
+                                        <i class="fas fa-folder text-yellow-500"></i> components
+                                    </div>
+                                    <div class="pl-5">
+                                        <div class="file-tree-item">
+                                            <i class="fas fa-file-code text-blue-500"></i> Header.jsx
+                                        </div>
+                                        <div class="file-tree-item">
+                                            <i class="fas fa-file-code text-blue-500"></i> ProductCard.jsx
+                                        </div>
+                                        <div class="file-tree-item">
+                                            <i class="fas fa-file-code text-blue-500"></i> Cart.jsx
+                                        </div>
+                                    </div>
+                                    <div class="file-tree-item">
+                                        <i class="fas fa-folder text-yellow-500"></i> pages
+                                    </div>
+                                    <div class="pl-5">
+                                        <div class="file-tree-item">
+                                            <i class="fas fa-file-code text-blue-500"></i> Home.jsx
+                                        </div>
+                                        <div class="file-tree-item">
+                                            <i class="fas fa-file-code text-blue-500"></i> Product.jsx
+                                        </div>
+                                        <div class="file-tree-item">
+                                            <i class="fas fa-file-code text-blue-500"></i> Checkout.jsx
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="file-tree-item">
+                                    <i class="fas fa-file-code text-blue-500"></i> App.jsx
+                                </div>
+                                <div class="file-tree-item">
+                                    <i class="fas fa-file-code text-blue-500"></i> index.js
+                                </div>
+                                <div class="file-tree-item">
+                                    <i class="fas fa-file text-gray-500"></i> package.json
+                                </div>
+                                <div class="file-tree-item">
+                                    <i class="fas fa-file text-gray-500"></i> README.md
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Content -->
+                        <div class="col-span-3">
+                            <div class="bg-gray-100 p-3 rounded-lg mb-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-gray-700 font-medium">
+                                        <i class="fas fa-file-code text-blue-500 mr-1"></i> src/components/ProductCard.jsx
+                                    </div>
+                                    <div>
+                                        <button class="text-gray-500 hover:text-gray-700 ml-2">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </button>
+                                        <button class="text-gray-500 hover:text-gray-700 ml-2">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="code-area">
+import React, { useState } from 'react';
+import { useCart } from '../context/CartContext';
+import { formatCurrency } from '../utils/format';
+import StarRating from './StarRating';
+
+const ProductCard = ({ product }) => {
+  const { addToCart } = useCart();
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.image
+    });
+  };
+
+  return (
+    <div 
+      className="product-card"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="product-image">
+        <img src={product.image} alt={product.name} />
+        {isHovered && (
+          <button 
+            className="quick-view-btn"
+            onClick={() => window.location.href = `/product/${product.id}`}
+          >
+            Quick View
+          </button>
+        )}
+      </div>
+      <div className="product-info">
+        <h3>{product.name}</h3>
+        <StarRating rating={product.rating} />
+        <p className="product-price">{formatCurrency(product.price)}</p>
+        <button 
+          className="add-to-cart-btn"
+          onClick={handleAddToCart}
+        >
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ProductCard;</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Project Section -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Create New Project</h2>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <form>
+                        <div class="mb-4">
+                            <label for="project_name" class="block text-gray-700 font-medium mb-2">Project Name</label>
+                            <input type="text" id="project_name" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter project name">
+                        </div>
+                        <div class="mb-4">
+                            <label for="description" class="block text-gray-700 font-medium mb-2">Description</label>
+                            <textarea id="description" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Brief description of your project"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Model</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="border border-gray-300 rounded-md p-4 cursor-pointer bg-blue-50 border-blue-500">
+                                    <div class="flex items-center mb-2">
+                                        <input type="radio" name="model" id="model1" class="mr-2" checked>
+                                        <label for="model1" class="font-medium">Gemini 2.0 Flash</label>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Google's fastest model for code generation</p>
+                                </div>
+                                <div class="border border-gray-300 rounded-md p-4 cursor-pointer hover:bg-blue-50">
+                                    <div class="flex items-center mb-2">
+                                        <input type="radio" name="model" id="model2" class="mr-2">
+                                        <label for="model2" class="font-medium">Claude 3 Opus</label>
+                                    </div>
+                                    <p class="text-sm text-gray-600">High-quality code with detailed reasoning</p>
+                                </div>
+                                <div class="border border-gray-300 rounded-md p-4 cursor-pointer hover:bg-blue-50">
+                                    <div class="flex items-center mb-2">
+                                        <input type="radio" name="model" id="model3" class="mr-2">
+                                        <label for="model3" class="font-medium">Custom Model</label>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Use your own API endpoint and key</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="prompt" class="block text-gray-700 font-medium mb-2">Prompt</label>
+                            <textarea id="prompt" rows="8" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Describe what you want to build in detail..."></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="tags" class="block text-gray-700 font-medium mb-2">Tags</label>
+                            <input type="text" id="tags" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="web, react, database">
+                            <p class="text-sm text-gray-500 mt-1">Separate tags with commas</p>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="is_public" class="mr-2">
+                                <label for="is_public" class="text-gray-700">Make project public</label>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-gray-700 font-medium">Upload Resources (Optional)</label>
+                                <button type="button" class="text-blue-600 hover:text-blue-800 text-sm">
+                                    <i class="fas fa-plus mr-1"></i> Add Files
+                                </button>
+                            </div>
+                            <div class="border border-dashed border-gray-300 rounded-md p-6 text-center">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-4xl mb-2"></i>
+                                <p class="text-gray-500">Drag and drop files here or click to browse</p>
+                                <p class="text-sm text-gray-400 mt-1">Supported formats: .txt, .md, .py, .js, .css, .html, .json</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mr-3">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                <i class="fas fa-rocket mr-1"></i> Generate Project
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Improve Project Section -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Improve Project</h2>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <form>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Project: E-commerce Platform</label>
+                            <p class="text-gray-600">Current iteration: 2</p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">Model</label>
+                            <select class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="gemini-2.0-flash">Google Gemini 2.0 Flash</option>
+                                <option value="claude-3-opus">Claude 3 Opus</option>
+                                <option value="custom">Custom Model</option>
+                            </select>
+                        </div>
+                        <div class="mb-6">
+                            <label for="improvement_prompt" class="block text-gray-700 font-medium mb-2">Improvement Prompt</label>
+                            <textarea id="improvement_prompt" rows="8" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Describe the improvements you want to make...">The current e-commerce platform works well, but I'd like to add the following features:
+
+1. Add a wishlist functionality where users can save products for later
+2. Implement product filtering by price range, category, and ratings
+3. Add a product comparison feature
+4. Improve the mobile responsiveness of the checkout process
+5. Add internationalization support for multiple languages</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input id="advanced_options" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="advanced_options" class="font-medium text-gray-700">Show Advanced Options</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mr-3">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                <i class="fas fa-sync-alt mr-1"></i> Start Improvement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="content-container py-6 px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <i class="fas fa-robot text-blue-600 text-xl mr-2"></i>
+                        <span class="text-gray-800 font-semibold">GPT Engineer</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mt-1">Powered by AI to build software projects</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-gray-800">
+                        <i class="fab fa-github text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-gray-800">
+                        <i class="fas fa-book text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-gray-800">
+                        <i class="fas fa-question-circle text-lg"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200 text-center text-sm text-gray-500">
+                &copy; 2023 GPT Engineer. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // Project creation form validation
+        const projectForm = document.querySelector('form');
+        if (projectForm) {
+            projectForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const projectName = document.getElementById('project_name')?.value;
+                const prompt = document.getElementById('prompt')?.value;
+                
+                if (!projectName || !prompt) {
+                    alert('Project name and prompt are required fields');
+                    return;
+                }
+                
+                // Simulate form submission with loading state
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    alert('Project created successfully! Redirecting to project page...');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+templates/project_templates/nodejs_api/
+├── template_info.json
+├── app.js                      # Main application file
+├── package.json                # Dependencies and scripts
+├── .env.example                # Environment variables example
+├── README.md                   # Template documentation
+├── controllers/                # Route controllers
+│   └── exampleController.js
+├── models/                     # Data models
+│   └── exampleModel.js
+├── routes/                     # API routes
+│   └── exampleRoutes.js
+├── middleware/                 # Custom middleware
+│   ├── auth.js
+│   └── errorHandler.js
+├── config/                     # Configuration files
+│   └── db.js
+└── utils/                      # Utility functions
+    └── helpers.js

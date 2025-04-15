@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./projects:/app/projects
+      - ./uploads:/app/uploads
+      - ./backups:/app/backups
+      - ./instance:/app/instance
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+      - AUTO_BACKUP_ENABLED=true
+      - AUTO_BACKUP_INTERVAL_HOURS=24
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional Redis service for more advanced caching
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

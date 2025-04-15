@@ -1,0 +1,27 @@
+templates/project_templates/vuejs_spa/
+├── template_info.json
+├── package.json                # Dependencies and scripts
+├── README.md                   # Template documentation
+├── babel.config.js             # Babel configuration
+├── vue.config.js               # Vue configuration
+├── .env.example                # Environment variables example
+├── public/                     # Public assets
+│   ├── index.html              # HTML entry point
+│   └── favicon.ico             # Favicon
+└── src/                        # Source code
+    ├── main.js                 # Application entry point
+    ├── App.vue                 # Root component
+    ├── router/                 # Vue Router
+    │   └── index.js
+    ├── store/                  # Vuex store
+    │   └── index.js
+    ├── assets/                 # Assets
+    │   ├── logo.png
+    │   └── scss/
+    │       └── main.scss
+    ├── components/             # Reusable components
+    │   ├── HelloWorld.vue
+    │   └── Navbar.vue
+    └── views/                  # Page components
+        ├── Home.vue
+        └── About.vue

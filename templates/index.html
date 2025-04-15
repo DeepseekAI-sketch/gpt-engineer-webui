@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+
+{% block title %}GPT-Engineer - Projects{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Dashboard Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Total Projects</h5>
+                            <h2 class="display-4">{{ stats.total_projects }}</h2>
+                        </div>
+                        <i class="bi bi-folder2 fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Completed Jobs</h5>
+                            <h2 class="display-4">{{ stats.completed_jobs }}</h2>
+                        </div>
+                        <i class="bi bi-check-circle fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Active Jobs</h5>
+                            <h2 class="display-4">{{ stats.active_jobs }}</h2>
+                        </div>
+                        <i class="bi bi-lightning fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Projects</h1>
+        <div class="d-flex gap-2">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search projects..." id="projectSearch">
+                <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <a href="{{ url_for('create_project') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Project
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <a class="text-decoration-none" data-bs-toggle="collapse" href="#filterCollapse" role="button">
+                <i class="bi bi-funnel"></i> Filters
+            </a>
+        </div>
+        <div class="collapse" id="filterCollapse">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="form-check">
+                                <input class="form-check-input filter-status" type="checkbox" value="all" id="statusAll" checked>
+                                <label class="form-check-label" for="statusAll">All</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-status" type="checkbox" value="completed" id="statusCompleted">
+                                <label class="form-check-label" for="statusCompleted">Completed</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-status" type="checkbox" value="running" id="statusRunning">
+                                <label class="form-check-label" for="statusRunning">Running</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-status" type="checkbox" value="failed" id="statusFailed">
+                                <label class="form-check-label" for="statusFailed">Failed</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Model</label>
+                            <select class="form-select" id="modelFilter">
+                                <option value="all" selected>All Models</option>
+                                <option value="gpt-4o">GPT-4o</option>
+                                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Sort By</label>
+                            <select class="form-select" id="sortFilter">
+                                <option value="last_modified_desc" selected>Recently Modified</option>
+                                <option value="last_modified_asc">Oldest Modified</option>
+                                <option value="created_desc">Recently Created</option>
+                                <option value="created_asc">Oldest Created</option>
+                                <option value="name_asc">Name (A-Z)</option>
+                                <option value="name_desc">Name (Z-A)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">View</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="viewType" id="viewCard" checked>
+                                <label class="btn btn-outline-secondary" for="viewCard">
+                                    <i class="bi bi-grid-3x3-gap"></i> Cards
+                                </label>
+                                <input type="radio" class="btn-check" name="viewType" id="viewList">
+                                <label class="btn btn-outline-secondary" for="viewList">
+                                    <i class="bi bi-list"></i> List
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-primary" id="applyFilters">Apply Filters</button>
+                    <button class="btn btn-outline-secondary" id="resetFilters">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if projects %}
+        <!-- Card View (default) -->
+        <div id="cardView" class="row">
+            {% for project in projects %}
+                <div class="col-md-4 col-lg-3 mb-4 project-item" 
+                     data-status="{{ project.status }}" 
+                     data-model="{{ project.model }}" 
+                     data-created="{{ project.created_at }}" 
+                     data-modified="{{ project.last_modified }}" 
+                     data-name="{{ project.name }}">
+                    <div class="card h-100 shadow project-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">{{ project.name }}</h5>
+                            {% if project.status == 'running' %}
+                                <span class="badge bg-info status-badge">Running</span>
+                            {% elif project.status == 'completed' %}
+                                <span class="badge bg-success status-badge">Completed</span>
+                            {% elif project.status == 'failed' %}
+                                <span class="badge bg-danger status-badge">Failed</span>
+                            {% else %}
+                                <span class="badge bg-secondary status-badge">Idle</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% if project.description %}
+                                <p class="card-text">{{ project.description|truncate(100) }}</p>
+                            {% endif %}
+                            
+                            <p class="card-text small">
+                                <i class="bi bi-calendar"></i> Created: {{ project.created_at.strftime('%Y-%m-%d %H:%M') if project.created_at else 'N/A' }}
+                            </p>
+                            <p class="card-text small">
+                                <i class="bi bi-clock"></i> Modified: {{ project.last_modified.strftime('%Y-%m-%d %H:%M') if project.last_modified else 'N/A' }}
+                            </p>
+                            <p class="card-text small">
+                                <i class="bi bi-cpu"></i> Model: {{ project.model }}
+                            </p>
+                            
+                            {% if project.tags %}
+                                <div class="mt-2">
+                                    {% for tag in project.tags.split(',') %}
+                                        <a href="{{ url_for('projects_by_tag', tag=tag) }}" class="badge bg-secondary text-decoration-none me-1">{{ tag }}</a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="{{ url_for('improve_project', project_id=project.id) }}" class="btn btn-sm btn-success">
+                                    <i class="bi bi-magic"></i> Improve
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ project.id }}">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" id="deleteModal{{ project.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ project.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel{{ project.id }}">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-exclamation-triangle"></i> Warning: This action cannot be undone!
+                                </div>
+                                <p>Are you sure you want to delete project "{{ project.name }}"?</p>
+                                <p>This will permanently remove all code and history associated with this project.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('delete_project', project_id=project.id) }}" method="post">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- List View (alternative) -->
+        <div id="listView" class="row d-none">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Model</th>
+                                    <th>Created</th>
+                                    <th>Modified</th>
+                                    <th>Tags</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                    <tr class="project-item" 
+                                        data-status="{{ project.status }}" 
+                                        data-model="{{ project.model }}" 
+                                        data-created="{{ project.created_at }}" 
+                                        data-modified="{{ project.last_modified }}" 
+                                        data-name="{{ project.name }}">
+                                        <td>
+                                            <a href="{{ url_for('project_detail', project_id=project.id) }}" class="fw-bold text-decoration-none">
+                                                {{ project.name }}
+                                            </a>
+                                            {% if project.description %}
+                                                <br>
+                                                <small class="text-muted">{{ project.description|truncate(50) }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if project.status == 'running' %}
+                                                <span class="badge bg-info">Running</span>
+                                            {% elif project.status == 'completed' %}
+                                                <span class="badge bg-success">Completed</span>
+                                            {% elif project.status == 'failed' %}
+                                                <span class="badge bg-danger">Failed</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Idle</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ project.model }}</td>
+                                        <td>{{ project.created_at.strftime('%Y-%m-%d %H:%M') if project.created_at else 'N/A' }}</td>
+                                        <td>{{ project.last_modified.strftime('%Y-%m-%d %H:%M') if project.last_modified else 'N/A' }}</td>
+                                        <td>
+                                            {% if project.tags %}
+                                                {% for tag in project.tags.split(',') %}
+                                                    <a href="{{ url_for('projects_by_tag', tag=tag) }}" class="badge bg-secondary text-decoration-none me-1">{{ tag }}</a>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('improve_project', project_id=project.id) }}" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-magic"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ project.id }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No projects found. Create a new project to get started.
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('create_project') }}" class="btn btn-lg btn-primary">
+                <i class="bi bi-plus-circle"></i> Create Your First Project
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+    // Toggle between card and list view
+    document.getElementById('viewCard').addEventListener('change', function() {
+        document.getElementById('cardView').classList.remove('d-none');
+        document.getElementById('listView').classList.add('d-none');
+    });
+    
+    document.getElementById('viewList').addEventListener('change', function() {
+        document.getElementById('cardView').classList.add('d-none');
+        document.getElementById('listView').classList.remove('d-none');
+    });
+    
+    // Status filter checkboxes behavior
+    document.getElementById('statusAll').addEventListener('change', function() {
+        const statusCheckboxes = document.querySelectorAll('.filter-status:not(#statusAll)');
+        statusCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            checkbox.disabled = this.checked;
+        });
+    });
+    
+    document.querySelectorAll('.filter-status:not(#statusAll)').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const statusAll = document.getElementById('statusAll');
+            const anyChecked = Array.from(document.querySelectorAll('.filter-status:not(#statusAll)')).some(cb => cb.checked);
+            statusAll.checked = !anyChecked;
+        });
+    });
+    
+    // Apply filters button
+    document.getElementById('applyFilters').addEventListener('click', function() {
+        const statusAll = document.getElementById('statusAll').checked;
+        const statusFilters = [];
+        
+        if (!statusAll) {
+            document.querySelectorAll('.filter-status:checked').forEach(cb => {
+                if (cb.value !== 'all') {
+                    statusFilters.push(cb.value);
+                }
+            });
+        }
+        
+        const modelFilter = document.getElementById('modelFilter').value;
+        const sortFilter = document.getElementById('sortFilter').value;
+        
+        const projects = document.querySelectorAll('.project-item');
+        
+        projects.forEach(project => {
+            let show = true;
+            
+            // Status filter
+            if (!statusAll && statusFilters.length > 0) {
+                if (!statusFilters.includes(project.dataset.status)) {
+                    show = false;
+                }
+            }
+            
+            // Model filter
+            if (modelFilter !== 'all' && project.dataset.model !== modelFilter) {
+                show = false;
+            }
+            
+            project.style.display = show ? '' : 'none';
+        });
+        
+        // Sort projects
+        const projectItems = Array.from(projects);
+        
+        projectItems.sort((a, b) => {
+            switch (sortFilter) {
+                case 'last_modified_desc':
+                    return new Date(b.dataset.modified) - new Date(a.dataset.modified);
+                case 'last_modified_asc':
+                    return new Date(a.dataset.modified) - new Date(b.dataset.modified);
+                case 'created_desc':
+                    return new Date(b.dataset.created) - new Date(a.dataset.created);
+                case 'created_asc':
+                    return new Date(a.dataset.created) - new Date(b.dataset.created);
+                case 'name_asc':
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                case 'name_desc':
+                    return b.dataset.name.localeCompare(a.dataset.name);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Re-append sorted projects
+        const cardView = document.getElementById('cardView');
+        const listView = document.getElementById('listView').querySelector('tbody');
+        
+        projectItems.forEach(project => {
+            if (project.tagName === 'DIV') {
+                cardView.appendChild(project);
+            } else {
+                listView.appendChild(project);
+            }
+        });
+    });
+    
+    // Reset filters
+    document.getElementById('resetFilters').addEventListener('click', function() {
+        document.getElementById('statusAll').checked = true;
+        document.querySelectorAll('.filter-status:not(#statusAll)').forEach(cb => {
+            cb.checked = false;
+            cb.disabled = true;
+        });
+        
+        document.getElementById('modelFilter').value = 'all';
+        document.getElementById('sortFilter').value = 'last_modified_desc';
+        
+        // Show all projects
+        document.querySelectorAll('.project-item').forEach(project => {
+            project.style.display = '';
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const searchTerm = document.getElementById('projectSearch').value.toLowerCase();
+        
+        document.querySelectorAll('.project-item').forEach(project => {
+            const name = project.dataset.name.toLowerCase();
+            const display = name.includes(searchTerm) ? '' : 'none';
+            project.style.display = display;
+        });
+    });
+    
+    // Search on enter key
+    document.getElementById('projectSearch').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('searchButton').click();
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

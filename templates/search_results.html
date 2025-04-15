@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results: {{ query }} - GPT-Engineer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Search Results: "{{ query }}"</h1>
+            
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Search Results</li>
+                </ol>
+            </nav>
+            
+            {% if projects %}
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ projects|length }} project(s) found</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Project Name</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Last Modified</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in projects %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="fw-bold text-decoration-none">
+                                                    {{ project.name }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if project.description %}
+                                                    {{ project.description|truncate(80) }}
+                                                {% else %}
+                                                    <span class="text-muted">No description</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if project.status == 'running' %}
+                                                    <span class="badge bg-info">Running</span>
+                                                {% elif project.status == 'completed' %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% elif project.status == 'failed' %}
+                                                    <span class="badge bg-danger">Failed</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Idle</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ project.last_modified.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </a>
+                                                    <a href="{{ url_for('improve_project', project_id=project.id) }}" class="btn btn-sm btn-success">
+                                                        <i class="bi bi-magic"></i> Improve
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No projects found matching "<strong>{{ query }}</strong>".
+                </div>
+                
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5>Search Tips</h5>
+                        <ul>
+                            <li>Check if all words are spelled correctly</li>
+                            <li>Try different keywords</li>
+                            <li>Try more general keywords</li>
+                            <li>Try searching by tags</li>
+                        </ul>
+                        
+                        <div class="mt-3">
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                <i class="bi bi-house-door"></i> Return to Home
+                            </a>
+                            <a href="{{ url_for('create_project') }}" class="btn btn-success ms-2">
+                                <i class="bi bi-plus-circle"></i> Create New Project
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
